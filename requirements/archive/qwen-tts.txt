@@ -1,0 +1,7 @@
+# [ARCHIVED] Qwen3-TTS 실험 재현용 격리 의존성
+-r ../cuda/cu128-torch.txt
+-r ../base.txt
+
+accelerate==1.12.0
+qwen-tts==0.1.1
+transformers==4.57.3

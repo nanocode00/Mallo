@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OrderCommandError",
+  "type": "object",
+  "required": [
+    "code",
+    "message",
+    "retryable"
+  ],
+  "properties": {
+    "code": {
+      "type": "string",
+      "enum": [
+        "INVALID_JSON",
+        "SCHEMA_ERROR",
+        "UNKNOWN_INTENT",
+        "MISSING_FIELD",
+        "MIXED_INTENT",
+        "AMBIGUOUS_TARGET",
+        "UNSUPPORTED_UTTERANCE"
+      ]
+    },
+    "message": {
+      "type": "string",
+      "description": "사용자에게 전달할 정중하고 명확한 한국어 안내 문장"
+    },
+    "command_index": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "실패가 발생한 Command의 배열 인덱스 (0부터 시작)"
+    },
+    "field": {
+      "type": ["string", "null"],
+      "description": "오류 또는 누락이 발생한 필드명 (예: temperature, quantity 등)"
+    },
+    "candidates": {
+      "type": ["array", "null"],
+      "items": { "type": "string" },
+      "description": "재입력 또는 Clarification용 선택 가능한 후보 목록"
+    },
+    "retryable": {
+      "type": "boolean",
+      "description": "동일 세션에서 사용자의 재발화로 복구 가능한지 여부"
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,11 @@
+# STT Whisper QLoRA 파인튜닝 의존성
+-r ../cuda/cu128-torch.txt
+-r ../base.txt
+-r ../dev.txt
+
+transformers==4.27.4
+tokenizers==0.13.3
+peft>=0.7.0,<0.21.0
+bitsandbytes>=0.41.0
+accelerate>=0.26.0
+av==18.1.0

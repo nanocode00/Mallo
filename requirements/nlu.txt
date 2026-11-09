@@ -1,0 +1,11 @@
+# Mallo Qwen3-0.6B merged-BF16 NLU sidecar production runtime
+-r cuda/cu128-torch.txt
+
+setuptools==81.0.0
+numpy==2.4.6
+transformers==5.15.0
+accelerate==1.14.0
+safetensors==0.8.0
+tokenizers==0.22.2
+sentencepiece==0.2.2
+jsonschema>=4.20,<5.0

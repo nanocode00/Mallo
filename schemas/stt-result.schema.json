@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "STTResult",
+  "type": "object",
+  "required": [
+    "text",
+    "language",
+    "is_final"
+  ],
+  "properties": {
+    "text": {
+      "type": "string",
+      "description": "STT 모델이 전사한 최종 한국어 텍스트"
+    },
+    "confidence": {
+      "type": ["number", "null"],
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "전사 신뢰도 점수 (0.0 ~ 1.0), 모델이 미제공 시 null"
+    },
+    "duration_ms": {
+      "type": ["number", "null"],
+      "minimum": 0.0,
+      "description": "오디오 길이 또는 STT 처리 소요 시간 (밀리초)"
+    },
+    "language": {
+      "type": "string",
+      "default": "ko",
+      "description": "인식 언어 코드 (기본 'ko')"
+    },
+    "alternatives": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "대체 인식 후보 텍스트 목록 (도메인 보정/후보 매칭용)"
+    },
+    "is_final": {
+      "type": "boolean",
+      "default": true,
+      "description": "발화 종료 후 확정된 최종 전사 결과인지 여부"
+    }
+  },
+  "additionalProperties": false
+}

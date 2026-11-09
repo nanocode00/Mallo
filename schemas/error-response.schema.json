@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ErrorResponse",
+  "type": "object",
+  "required": [
+    "error_code",
+    "module",
+    "message",
+    "user_message",
+    "retryable"
+  ],
+  "properties": {
+    "error_code": {
+      "type": "string",
+      "enum": [
+        "AUDIO_RECORD_FAILED",
+        "EMPTY_INPUT",
+        "STT_FAILED",
+        "INVALID_JSON",
+        "SCHEMA_ERROR",
+        "UNKNOWN_INTENT",
+        "MISSING_FIELD",
+        "MIXED_INTENT",
+        "UNSUPPORTED_UTTERANCE",
+        "AMBIGUOUS_TARGET",
+        "INVALID_COMMAND",
+        "MENU_NOT_FOUND",
+        "INVALID_OPTION",
+        "INVALID_QUANTITY",
+        "EMPTY_CART",
+        "CART_ITEM_NOT_FOUND",
+        "TTS_FAILED",
+        "INTERNAL_SYSTEM_ERROR"
+      ]
+    },
+    "module": {
+      "type": "string",
+      "enum": ["audio", "stt", "nlu", "order_engine", "tts", "system"]
+    },
+    "message": {
+      "type": "string",
+      "description": "개발자/로깅용 상세 오류 설명"
+    },
+    "user_message": {
+      "type": "string",
+      "description": "고령 사용자를 위한 친절한 음성 및 UI 안내 텍스트"
+    },
+    "recovery_hint": {
+      "type": ["string", "null"],
+      "description": "사용자가 어떻게 행동해야 하는지 안내하는 구체적 예시 힌트"
+    },
+    "retryable": {
+      "type": "boolean",
+      "description": "동일 세션에서 사용자가 재발화/재시도하여 복구 가능한지 여부"
+    },
+    "details": {
+      "type": "object",
+      "description": "선택적 부가 메타데이터 (예: 누락된 필드명, 후보 목록 등)",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mallo.local/schemas/order-command.schema.json",
+  "title": "Mallo NLU OrderCommand Batch",
+  "type": "array",
+  "minItems": 1,
+  "maxItems": 10,
+  "items": {"$ref": "#/$defs/orderCommand"},
+  "$defs": {
+    "orderCommand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "request_id",
+        "intent",
+        "target_item_id",
+        "category_id",
+        "quantity",
+        "temperature",
+        "query_tags",
+        "detail_fields",
+        "options"
+        ,"fulfillment_type"
+      ],
+      "properties": {
+        "request_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "intent": {
+          "enum": [
+            "ADD_ITEM",
+            "REMOVE_ITEM",
+            "UPDATE_QUANTITY",
+            "UPDATE_OPTION",
+            "QUERY_MENU",
+            "QUERY_CART",
+            "CONFIRM_ORDER",
+            "SELECT_PAYMENT_METHOD",
+            "CANCEL",
+            "RESET_ORDER",
+            "UNDO",
+            "REQUEST_REPEAT",
+            "REQUEST_CLARIFICATION",
+            "REQUEST_SLOWER",
+            "REQUEST_DEFAULT_SPEED"
+            ,"SET_FULFILLMENT"
+          ]
+        },
+        "target_item_id": {
+          "type": ["string", "null"],
+          "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+        },
+        "category_id": {
+          "type": ["string", "null"],
+          "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+        },
+        "quantity": {
+          "type": ["integer", "null"],
+          "minimum": 1
+        },
+        "temperature": {
+          "type": ["string", "null"],
+          "enum": ["hot", "iced", null]
+        },
+        "query_tags": {
+          "type": ["array", "null"],
+          "minItems": 1,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/snakeCaseId"}
+        },
+        "detail_fields": {
+          "type": ["array", "null"],
+          "minItems": 1,
+          "maxItems": 6,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "description",
+              "price",
+              "sweetness",
+              "caffeine",
+              "milk",
+              "temperature"
+            ]
+          }
+        },
+        "options": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/beverageOptions"}
+          ]
+        }
+        ,"fulfillment_type": {"type": ["string", "null"], "enum": ["dine_in", "takeout", null]}
+      }
+    },
+    "beverageOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["size", "extra_shots", "caffeine", "syrup_pumps", "ice_amount"],
+      "properties": {
+        "size": {
+          "type": ["string", "null"],
+          "enum": ["small", "medium", "large", null]
+        },
+        "extra_shots": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "caffeine": {
+          "type": ["string", "null"],
+          "enum": ["regular", "decaf", null]
+        },
+        "syrup_pumps": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "ice_amount": {
+          "type": ["string", "null"],
+          "enum": ["none", "less", "normal", "more", null]
+        }
+      }
+    },
+    "snakeCaseId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+    }
+  }
+}

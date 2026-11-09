@@ -1,0 +1,16 @@
+# Mallo 통합 서비스 런타임 (Gateway + STT + TTS)
+-r cuda/cu128-torch.txt
+-r base.txt
+
+# Whisper STT 런타임
+transformers==4.27.4
+tokenizers==0.13.3
+av==18.1.0
+
+# MeloTTS 런타임
+librosa==0.9.1
+accelerate==1.12.0
+mecab-python3==1.0.9
+python-mecab-ko==1.3.7
+python-mecab-ko-dic==2.1.1.post2
+melotts @ git+https://github.com/myshell-ai/MeloTTS.git@209145371cff8fc3bd60d7be902ea69cbdb7965a

@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>말로 STT 데모 — 음성 인식 실시간 시연</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Pretendard", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 55%, #0f3460 100%);
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 20px;
+  }
+  header { text-align: center; margin-bottom: 22px; }
+  header h1 { font-size: 34px; font-weight: 800; letter-spacing: -1px; }
+  header h1 .accent { color: #4fc3f7; }
+  header p.sub { margin-top: 8px; font-size: 16px; color: #b8c4d9; }
+  .badges { display: flex; gap: 10px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+  .badge {
+    font-size: 13px; padding: 6px 14px; border-radius: 999px;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18); color: #dbe7ff;
+  }
+  .badge.model { border-color: #4fc3f7; color: #4fc3f7; font-weight: 700; }
+  #connBadge.ok { border-color: #4ade80; color: #4ade80; }
+  #connBadge.down { border-color: #f87171; color: #f87171; }
+
+  /* 마이크 버튼 */
+  .mic-area { display: flex; flex-direction: column; align-items: center; margin: 26px 0 10px; }
+  #micBtn {
+    width: 170px; height: 170px; border-radius: 50%;
+    border: none; cursor: pointer; position: relative;
+    background: linear-gradient(145deg, #2563eb, #1d4ed8);
+    box-shadow: 0 12px 40px rgba(37,99,235,.45);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .15s ease;
+  }
+  #micBtn:hover { transform: scale(1.04); }
+  #micBtn svg { width: 64px; height: 64px; fill: #fff; }
+  #micBtn.recording {
+    background: linear-gradient(145deg, #dc2626, #b91c1c);
+    box-shadow: 0 12px 40px rgba(220,38,38,.5);
+    animation: pulse 1.2s infinite;
+  }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(239,68,68,.55); }
+    70%  { box-shadow: 0 0 0 34px rgba(239,68,68,0); }
+    100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+  }
+  #statusText { margin-top: 18px; font-size: 19px; color: #cdd9ee; min-height: 26px; }
+  #recTimer { font-size: 30px; font-weight: 800; color: #f87171; min-height: 38px; margin-top: 4px; }
+  .device-row { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+  .device-row label { font-size: 15px; color: #b8c4d9; white-space: nowrap; }
+  #deviceSelect {
+    max-width: 380px; padding: 8px 12px; border-radius: 10px; font-size: 14px;
+    background: rgba(255,255,255,.1); color: #fff; border: 1px solid rgba(255,255,255,.25);
+  }
+  #deviceSelect option { color: #111; }
+  #refreshDevices {
+    padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,.25);
+    background: rgba(255,255,255,.08); color: #dbe7ff; cursor: pointer; font-size: 15px;
+  }
+  .meter-wrap {
+    width: min(420px, 80vw); height: 12px; margin-top: 8px;
+    background: rgba(255,255,255,.1); border-radius: 999px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,.15);
+  }
+  #meterFill { height: 100%; width: 0%; background: linear-gradient(90deg, #4ade80, #facc15, #f87171); transition: width .06s linear; }
+  .file-row { margin-top: 18px; display: flex; align-items: center; gap: 12px; }
+  #fileInput { display: none; }
+  .file-label {
+    padding: 10px 22px; border-radius: 999px; cursor: pointer;
+    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.3);
+    color: #dbe7ff; font-size: 15px;
+  }
+  .file-label:hover { background: rgba(255,255,255,.18); }
+  .file-name { font-size: 14px; color: #93a5c4; }
+
+  /* 결과 카드 */
+  .result-card {
+    width: min(860px, 94vw);
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 20px;
+    padding: 30px 34px;
+    margin-top: 14px;
+    backdrop-filter: blur(6px);
+  }
+  .result-label { font-size: 14px; color: #93a5c4; margin-bottom: 10px; letter-spacing: 2px; }
+  #sttText {
+    font-size: 40px; font-weight: 800; line-height: 1.35; min-height: 56px;
+    word-break: keep-all;
+  }
+  #sttText.placeholder { color: #5b6b88; font-weight: 400; font-size: 24px; }
+  .meta-row { display: flex; gap: 26px; margin-top: 20px; flex-wrap: wrap; align-items: center; }
+  .meta-item { font-size: 15px; color: #b8c4d9; }
+  .meta-item b { color: #fff; font-size: 18px; }
+  .conf-bar-wrap { flex: 1; min-width: 180px; max-width: 320px; height: 10px; border-radius: 999px; background: rgba(255,255,255,.12); overflow: hidden; }
+  #confBar { height: 100%; width: 0%; border-radius: 999px; background: linear-gradient(90deg,#4ade80,#22d3ee); transition: width .4s ease; }
+  #altsRow { margin-top: 16px; display: none; }
+  #altsRow .alt-chip {
+    display: inline-block; margin: 4px 6px 0 0; padding: 6px 14px; border-radius: 999px;
+    background: rgba(79,195,247,.12); border: 1px solid rgba(79,195,247,.4);
+    color: #a5dcff; font-size: 15px;
+  }
+
+  /* 에러 */
+  #errorBox {
+    display: none; width: min(860px, 94vw); margin-top: 14px;
+    background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.45);
+    color: #fecaca; border-radius: 14px; padding: 14px 20px; font-size: 16px;
+    white-space: pre-line; line-height: 1.6;
+  }
+
+  /* 히스토리 */
+  .history-card {
+    width: min(860px, 94vw); margin-top: 18px;
+    background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);
+    border-radius: 16px; padding: 18px 24px 22px;
+  }
+  .history-card h2 { font-size: 16px; color: #93a5c4; font-weight: 700; margin-bottom: 10px; letter-spacing: 1px; }
+  #historyTable { width: 100%; border-collapse: collapse; font-size: 15px; }
+  #historyTable th { text-align: left; color: #7e91b3; font-weight: 600; padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,.12); }
+  #historyTable td { padding: 9px 8px; border-bottom: 1px solid rgba(255,255,255,.06); word-break: keep-all; }
+  #historyTable td.num { color: #9fb2d4; white-space: nowrap; }
+  #historyEmpty { color: #5b6b88; font-size: 14px; padding: 8px; }
+
+  footer { margin-top: 26px; font-size: 13px; color: #64769a; text-align: center; line-height: 1.7; }
+  footer code { background: rgba(255,255,255,.08); padding: 2px 8px; border-radius: 6px; color: #9fc3ff; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎙️ 말로 <span class="accent">STT 실시간 데모</span></h1>
+  <p class="sub">마이크로 말하면 음성이 텍스트로 변환됩니다</p>
+  <div class="badges">
+    <span class="badge model">후보 모델 · Whisper Medium · QLoRA+Domain merged-bf16</span>
+    <span class="badge">CER 0.1095 · WER 0.3298</span>
+    <span class="badge" id="connBadge">서버 확인 중...</span>
+  </div>
+</header>
+
+<div class="mic-area">
+  <div class="device-row">
+    <label for="deviceSelect">🎤 입력 장치:</label>
+    <select id="deviceSelect"><option value="">기본 장치</option></select>
+    <button id="refreshDevices" title="장치 목록 새로고침">↻</button>
+  </div>
+  <button id="micBtn" aria-label="녹음 시작/중지">
+    <svg id="micIcon" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z"/></svg>
+  </button>
+  <div id="statusText">버튼을 누르고 말씀해 주세요</div>
+  <div id="recTimer"></div>
+  <div class="meter-wrap" title="입력 레벨">
+    <div id="meterFill"></div>
+  </div>
+  <div class="file-row">
+    <input type="file" id="fileInput" accept=".wav,.mp3,.webm,.m4a,.flac,audio/*" />
+    <label for="fileInput" class="file-label">📁 WAV 파일로 테스트</label>
+    <span id="fileName" class="file-name"></span>
+  </div>
+</div>
+
+<div class="result-card">
+  <div class="result-label">인식 결과 (STT TRANSCRIPT)</div>
+  <div id="sttText" class="placeholder">아직 인식된 문장이 없습니다.</div>
+  <div class="meta-row">
+    <span class="meta-item">신뢰도 <b id="confText">-</b></span>
+    <div class="conf-bar-wrap"><div id="confBar"></div></div>
+    <span class="meta-item">STT 지연 <b id="latencyText">-</b></span>
+  </div>
+  <div id="altsRow">
+    <span class="meta-item" style="margin-right:8px;">대체 후보</span>
+    <span id="altsChips"></span>
+  </div>
+</div>
+
+<div id="errorBox"></div>
+
+<div class="history-card">
+  <h2>인식 히스토리</h2>
+  <table id="historyTable">
+    <thead><tr><th style="width:50px;">#</th><th>인식된 문장</th><th style="width:110px;">신뢰도</th><th style="width:120px;">지연(ms)</th></tr></thead>
+    <tbody id="historyBody"></tbody>
+  </table>
+  <div id="historyEmpty">아직 기록이 없습니다.</div>
+</div>
+
+<footer>
+  서버 실행: <code>.venvs\runtime\Scripts\python.exe scripts\run_mallo_server.py</code><br />
+  현재 데모·평가 모델(후보): whisper-medium QLoRA 방언·도메인 순차 학습 BF16 머지 (도메인 평가 506건 기준 CER 0.1095)
+</footer>
+
+<script src="runtime-config.js"></script>
+<script src="api-url.js"></script>
+<script>
+(() => {
+  const micBtn = document.getElementById("micBtn");
+  const statusText = document.getElementById("statusText");
+  const recTimer = document.getElementById("recTimer");
+  const sttText = document.getElementById("sttText");
+  const confText = document.getElementById("confText");
+  const confBar = document.getElementById("confBar");
+  const latencyText = document.getElementById("latencyText");
+  const altsRow = document.getElementById("altsRow");
+  const altsChips = document.getElementById("altsChips");
+  const errorBox = document.getElementById("errorBox");
+  const historyBody = document.getElementById("historyBody");
+  const historyEmpty = document.getElementById("historyEmpty");
+  const connBadge = document.getElementById("connBadge");
+  const deviceSelect = document.getElementById("deviceSelect");
+  const refreshDevices = document.getElementById("refreshDevices");
+  const meterFill = document.getElementById("meterFill");
+  const apiFetch = window.MalloApi.apiFetch;
+
+  const MAX_RECORD_MS = 10000;
+  let mediaRecorder = null;
+  let mediaStream = null;
+  let chunks = [];
+  let recording = false;
+  let starting = false;
+  let timerInterval = null;
+  let recordTimeout = null;
+  let recordStart = 0;
+  let historyCount = 0;
+
+  /* ---------- 서버 연결 확인 ---------- */
+  apiFetch("/api/state").then(r => r.json()).then(() => {
+    connBadge.textContent = "● 서버 연결됨";
+    connBadge.classList.add("ok");
+  }).catch(() => {
+    connBadge.textContent = "● 서버 연결 안 됨";
+    connBadge.classList.add("down");
+  });
+
+  function showError(msg) {
+    errorBox.style.display = "block";
+    errorBox.textContent = msg;
+  }
+  function clearError() { errorBox.style.display = "none"; }
+
+  /* ---------- 입력 장치 목록 ---------- */
+  async function loadDevices() {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const mics = devices.filter(d => d.kind === "audioinput");
+      const current = deviceSelect.value;
+      deviceSelect.innerHTML = '<option value="">기본 장치 (Windows 설정 따름)</option>';
+      mics.forEach((d, i) => {
+        const opt = document.createElement("option");
+        opt.value = d.deviceId;
+        opt.textContent = d.label || ("입력 장치 " + (i + 1));
+        deviceSelect.appendChild(opt);
+      });
+      if ([...deviceSelect.options].some(o => o.value === current)) {
+        deviceSelect.value = current;
+      }
+    } catch (e) { /* ignore */ }
+  }
+  loadDevices();
+  refreshDevices.addEventListener("click", loadDevices);
+  navigator.mediaDevices.addEventListener?.("devicechange", loadDevices);
+
+  /* ---------- 입력 레벨 미터 ---------- */
+  let audioCtx = null;
+  let analyser = null;
+  let meterRAF = null;
+  let maxPeak = 0;
+
+  function startMeter(stream) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const src = audioCtx.createMediaStreamSource(stream);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 512;
+    src.connect(analyser);
+    const data = new Uint8Array(analyser.frequencyBinCount);
+    maxPeak = 0;
+    const tick = () => {
+      analyser.getByteTimeDomainData(data);
+      let peak = 0;
+      for (let i = 0; i < data.length; i++) {
+        const v = Math.abs(data[i] - 128);
+        if (v > peak) peak = v;
+      }
+      if (peak > maxPeak) maxPeak = peak;
+      meterFill.style.width = Math.min(100, (peak / 128) * 140) + "%";
+      meterRAF = requestAnimationFrame(tick);
+    };
+    tick();
+  }
+
+  function stopMeter() {
+    if (meterRAF) cancelAnimationFrame(meterRAF);
+    meterRAF = null;
+    if (audioCtx) { audioCtx.close(); audioCtx = null; }
+    analyser = null;
+    meterFill.style.width = "0%";
+  }
+
+  /* ---------- WAV 인코딩 (16kHz mono PCM16) ---------- */
+  function encodeWav16k(samples, sampleRate) {
+    const buffer = new ArrayBuffer(44 + samples.length * 2);
+    const view = new DataView(buffer);
+    const writeStr = (off, s) => { for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); };
+    writeStr(0, "RIFF");
+    view.setUint32(4, 36 + samples.length * 2, true);
+    writeStr(8, "WAVE");
+    writeStr(12, "fmt ");
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, 1, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * 2, true);
+    view.setUint16(32, 2, true);
+    view.setUint16(34, 16, true);
+    writeStr(36, "data");
+    view.setUint32(40, samples.length * 2, true);
+    let off = 44;
+    for (let i = 0; i < samples.length; i++, off += 2) {
+      const s = Math.max(-1, Math.min(1, samples[i]));
+      view.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+    }
+    return new Uint8Array(buffer);
+  }
+
+  async function blobToWav16kMono(blob) {
+    const arrayBuffer = await blob.arrayBuffer();
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    let decoded;
+    try {
+      decoded = await ctx.decodeAudioData(arrayBuffer);
+    } finally {
+      ctx.close();
+    }
+    const length = Math.max(1, Math.ceil(decoded.duration * 16000));
+    const offline = new OfflineAudioContext(1, length, 16000);
+    const src = offline.createBufferSource();
+    src.buffer = decoded;
+    src.connect(offline.destination);
+    src.start();
+    const rendered = await offline.startRendering();
+    return encodeWav16k(rendered.getChannelData(0), 16000);
+  }
+
+  /* ---------- 녹음 ---------- */
+  async function startRecording() {
+    // getUserMedia 권한·장치 프롬프트 대기 구간을 포함한 시작 흐름 전체의
+    // 재진입을 차단한다. (대기 중 더블클릭/Space 연타 시 스트림·레코더가
+    // 이중 생성되고 이전 인스턴스가 유출되는 문제 방지)
+    if (starting || recording) return;
+    starting = true;
+    try {
+      await startRecordingInner();
+    } finally {
+      starting = false;
+    }
+  }
+
+  async function startRecordingInner() {
+    clearError();
+    const constraints = { audio: true };
+    if (deviceSelect.value) {
+      constraints.audio = { deviceId: { exact: deviceSelect.value } };
+    }
+    try {
+      statusText.textContent = "마이크 권한 요청 중...";
+      mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+    } catch (err) {
+      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+        showError(
+          "마이크 권한이 거부되었습니다.\n" +
+          "1) 브라우저 주소창 왼쪽 자물쇠 아이콘 → 마이크 '허용' 설정\n" +
+          "2) Windows 설정 > 개인 정보 및 보안 > 마이크에서 브라우저 허용 확인"
+        );
+      } else if (err.name === "NotFoundError" || err.name === "DevicesNotFoundError") {
+        showError("마이크 장치를 찾을 수 없습니다. 마이크가 연결되어 있는지 확인해 주세요.");
+      } else if (err.name === "NotReadableError" || err.name === "TrackStartError") {
+        showError(
+          "마이크를 다른 프로그램이 사용 중입니다.\n" +
+          "(MagicMic, MMVC, OBS, 게임 보이스챗 등을 종료한 뒤 다시 시도해 주세요)"
+        );
+      } else {
+        showError("마이크를 열 수 없습니다: " + err.name + " - " + err.message);
+      }
+      statusText.textContent = "마이크 오류";
+      return;
+    }
+    loadDevices(); // 권한 획득 후 라벨 채우기
+    chunks = [];
+    try {
+      mediaRecorder = new MediaRecorder(mediaStream);
+    } catch (err) {
+      mediaStream?.getTracks().forEach(t => t.stop());
+      mediaStream = null;
+      showError("이 브라우저는 MediaRecorder를 지원하지 않습니다. Chrome 또는 Edge를 사용해 주세요.");
+      return;
+    }
+    mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+    mediaRecorder.onstop = onRecordingStop;
+    mediaRecorder.start();
+    recording = true;
+    recordStart = Date.now();
+    micBtn.classList.add("recording");
+    startMeter(mediaStream);
+    statusText.textContent = "🔴 녹음 중... 말씀해 주세요. (막대가 움직이면 입력 정상)";
+    timerInterval = setInterval(() => {
+      const sec = ((Date.now() - recordStart) / 1000).toFixed(1);
+      recTimer.textContent = sec + "s";
+    }, 100);
+    if (recordTimeout) {
+      clearTimeout(recordTimeout);
+      recordTimeout = null;
+    }
+    const recorder = mediaRecorder;
+    recordTimeout = setTimeout(() => {
+      if (recorder.state === "recording") recorder.stop();
+    }, MAX_RECORD_MS);
+  }
+
+  function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state === "recording") mediaRecorder.stop();
+  }
+
+  async function onRecordingStop() {
+    recording = false;
+    if (recordTimeout) {
+      clearTimeout(recordTimeout);
+      recordTimeout = null;
+    }
+    clearInterval(timerInterval);
+    recTimer.textContent = "";
+    stopMeter();
+    mediaStream.getTracks().forEach(t => t.stop());
+    micBtn.classList.remove("recording");
+
+    if (maxPeak < 3) {
+      showError(
+        "입력 레벨이 0입니다 — 선택된 마이크에서 소리가 들어오지 않습니다.\n" +
+        "위 '입력 장치'에서 실제 마이크(USB Condenser Microphone 또는 웹캠)를 선택하거나,\n" +
+        "Windows 설정 > 시스템 > 소리 > 입력에서 기본 장치를 변경해 주세요.\n" +
+        "(MagicMic 가상 마이크가 기본값이면 무음으로 인식됩니다)"
+      );
+      statusText.textContent = "마이크 입력 없음 — 장치를 확인해 주세요";
+      return;
+    }
+
+    const blob = new Blob(chunks, { type: chunks[0] ? chunks[0].type : "audio/webm" });
+    const peakPct = Math.round((maxPeak / 128) * 100);
+    const durSec = ((Date.now() - recordStart) / 1000).toFixed(1);
+    const captureInfo = `캡처 ${durSec}s / ${(blob.size / 1024).toFixed(0)}KB / 최대 레벨 ${peakPct}%`;
+
+    if (blob.size < 2000) {
+      statusText.textContent = `녹음이 너무 짧습니다 (${captureInfo}). 다시 시도해 주세요.`;
+      return;
+    }
+    statusText.textContent = `⏳ 음성 인식 중... (${captureInfo})`;
+    const t0 = performance.now();
+
+    try {
+      const wavBytes = await blobToWav16kMono(blob);
+      const resp = await apiFetch("/api/stt", { method: "POST", body: wavBytes });
+      const data = await resp.json();
+      const roundTrip = Math.round(performance.now() - t0);
+
+      if (!resp.ok || data.error) {
+        showError("STT 처리 실패: " + (data.error || ("HTTP " + resp.status)));
+        statusText.textContent = "실패 — 다시 시도해 주세요";
+        return;
+      }
+      renderResult(data, roundTrip, captureInfo, peakPct);
+    } catch (err) {
+      showError("서버에 연결할 수 없습니다. 서버가 실행 중인지 확인해 주세요. (" + err.message + ")");
+      statusText.textContent = "서버 연결 오류";
+      connBadge.textContent = "● 서버 연결 안 됨";
+      connBadge.classList.add("down");
+    }
+  }
+
+  function renderResult(data, roundTrip, captureInfo, peakPct) {
+    const text = (data.text || "").trim();
+    sttText.classList.remove("placeholder");
+    sttText.textContent = text || "(빈 결과 — 인식된 음성이 없습니다)";
+
+    if (!text) {
+      if (peakPct != null && peakPct < 10) {
+        statusText.textContent =
+          `⚠️ 입력이 거의 들어오지 않았습니다 (${captureInfo}). ` +
+          "마이크 이득(게인)·Windows 입력 볼륨을 높이거나 마이크에 가까이 말해 주세요.";
+      } else {
+        statusText.textContent =
+          `⚠️ 인식 실패 (${captureInfo}). 더 또박또박 말하거나 다른 파일로 시도해 주세요.`;
+      }
+    } else {
+      statusText.textContent = `✅ 인식 완료 (${captureInfo}) — 계속하려면 버튼을 누르세요`;
+    }
+
+    const conf = data.confidence;
+    if (typeof conf === "number" && conf > 0) {
+      const pct = Math.round(conf * 100);
+      confText.textContent = pct + "%";
+      confBar.style.width = pct + "%";
+    } else {
+      confText.textContent = "-";
+      confBar.style.width = "0%";
+    }
+    latencyText.textContent =
+      (data.latency_ms != null ? Math.round(data.latency_ms) + "ms" : "-")
+      + " (왕복 " + roundTrip + "ms)";
+
+    const alts = (data.alternatives || []).filter(a => a && a.trim());
+    if (alts.length > 0) {
+      altsRow.style.display = "block";
+      altsChips.innerHTML = alts.map(a => `<span class="alt-chip">${escapeHtml(a)}</span>`).join("");
+    } else {
+      altsRow.style.display = "none";
+      altsChips.innerHTML = "";
+    }
+
+    historyCount += 1;
+    historyEmpty.style.display = "none";
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="num">${historyCount}</td>
+      <td>${escapeHtml(text) || "-"}</td>
+      <td class="num">${typeof conf === "number" && conf > 0 ? Math.round(conf * 100) + "%" : "-"}</td>
+      <td class="num">${data.latency_ms != null ? Math.round(data.latency_ms) : "-"}</td>`;
+    historyBody.prepend(tr);
+    while (historyBody.rows.length > 10) historyBody.deleteRow(-1);
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    })[c]);
+  }
+
+  /* ---------- 이벤트 ---------- */
+  micBtn.addEventListener("click", () => {
+    if (recording) stopRecording();
+    else startRecording();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.code === "Space" && !e.repeat && document.activeElement.tagName !== "INPUT") {
+      e.preventDefault();
+      if (recording) stopRecording();
+      else startRecording();
+    }
+  });
+
+  /* ---------- WAV 파일 업로드 테스트 ---------- */
+  const fileInput = document.getElementById("fileInput");
+  const fileNameEl = document.getElementById("fileName");
+
+  fileInput.addEventListener("change", async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    clearError();
+    fileNameEl.textContent = file.name;
+    statusText.textContent = `⏳ 파일 인식 중... (${file.name})`;
+    const t0 = performance.now();
+    try {
+      const body = new Uint8Array(await file.arrayBuffer());
+      const resp = await apiFetch("/api/stt", { method: "POST", body });
+      const data = await resp.json();
+      const roundTrip = Math.round(performance.now() - t0);
+      if (!resp.ok || data.error) {
+        showError("STT 처리 실패: " + (data.error || ("HTTP " + resp.status)));
+        statusText.textContent = "실패 — 다른 파일로 시도해 주세요";
+        return;
+      }
+      renderResult(data, roundTrip, file.name, null);
+    } catch (err) {
+      showError("서버에 연결할 수 없습니다. (" + err.message + ")");
+      statusText.textContent = "서버 연결 오류";
+    }
+  });
+})();
+</script>
+</body>
+</html>

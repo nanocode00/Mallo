@@ -1,0 +1,214 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SessionLogEvent",
+  "type": "object",
+  "required": [
+    "session_id",
+    "participant_id",
+    "group",
+    "timestamp",
+    "event_type",
+    "step_index",
+    "is_success"
+  ],
+  "properties": {
+    "session_id": {
+      "type": "string",
+      "description": "세션 고유 식별자 (sess_YYYYMMDD_HHMMSS_XXX)"
+    },
+    "participant_id": {
+      "type": "string",
+      "description": "비식별 참가자 식별자 (P01, P02 등)"
+    },
+    "group": {
+      "type": "string",
+      "enum": [
+        "Group_A_Touch",
+        "Group_B_FixedVoice",
+        "Group_C_Mallo"
+      ],
+      "description": "실험 비교군 그룹"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "이벤트 발생 ISO 8601 타임스탬프"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "SESSION_START",
+        "ORDER_INTERACTION",
+        "TTS_SPEED_CONTROL",
+        "ERROR_RECOVERY",
+        "ORDER_CONFIRM",
+        "PAYMENT_COMPLETE",
+        "SESSION_RESET"
+      ],
+      "description": "인터랙션 이벤트 유형"
+    },
+    "task_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "수행 중인 평가 과제 ID (TASK-1 ~ TASK-5)"
+    },
+    "step_index": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "세션 내 턴/스텝 순번"
+    },
+    "audio_input_duration_seconds": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0.0,
+      "description": "입력된 사용자 음성 길이 (초)"
+    },
+    "stt_transcription": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "STT 인식 전사 텍스트"
+    },
+    "stt_confidence": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "STT 전사 신뢰도"
+    },
+    "nlu_intent": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "NLU 추출 의도"
+    },
+    "nlu_source": {
+      "type": ["string", "null"],
+      "description": "rule fast-path, pending handler, Qwen fallback 또는 safety guard 선택"
+    },
+    "order_commands": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "object"
+      },
+      "description": "NLU에서 추출된 OrderCommand 목록"
+    },
+    "order_state_before": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "인터랙션 전 장바구니 및 주문 상태"
+    },
+    "order_state_after": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "인터랙션 후 장바구니 및 총액 상태"
+    },
+    "tts_level": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "enum": [
+        0,
+        1,
+        2,
+        null
+      ],
+      "description": "적용된 Adaptive TTS Level"
+    },
+    "response_text": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "사용자에게 안내된 최종 텍스트"
+    },
+    "tts_output_text": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Adaptive text transform 후 TTS에 전달한 텍스트"
+    },
+    "latencies": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "stt_seconds": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0.0
+        },
+        "nlu_seconds": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0.0
+        },
+        "agent_seconds": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0.0,
+          "description": "Order Engine Agent 실행 시간"
+        },
+        "order_engine_seconds": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0.0
+        },
+        "tts_seconds": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0.0
+        },
+        "total_e2e_seconds": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0.0
+        }
+      },
+      "additionalProperties": false,
+      "description": "모듈별 및 전체 처리 지연시간 (초)"
+    },
+    "error_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "발생한 오류 코드 (있는 경우)"
+    },
+    "is_success": {
+      "type": "boolean",
+      "description": "해당 인터랙션 턴의 성공 여부"
+    }
+  },
+  "additionalProperties": false
+}

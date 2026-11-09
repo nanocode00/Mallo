@@ -1,0 +1,112 @@
+/* Senior-first kiosk foundation. Loaded after legacy styles.css. */
+:root {
+  --font-display: 48px;
+  --font-action: 36px;
+  --font-menu: 34px;
+  --font-body-senior: 28px;
+  --font-supporting: 24px;
+  --senior-content-width: 920px;
+  --kiosk-header-height: 112px;
+  --kiosk-content-width: 994px;
+  --kiosk-section-gap: 32px;
+  --kiosk-screen-padding-inline: 54px;
+  --kiosk-screen-padding-block: 44px;
+  --touch-target-min: 76px;
+  --font-heading: 48px;
+  --font-body: 28px;
+}
+
+body {
+  overflow: hidden;
+}
+
+.kiosk-stage {
+  width: 100vw;
+  height: 100dvh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #e9e4da;
+}
+
+.kiosk-shell {
+  width: min(100vw, calc(100dvh * 9 / 16));
+  height: min(100dvh, calc(100vw * 16 / 9));
+  min-height: auto;
+  aspect-ratio: 9 / 16;
+  container-type: size;
+  container-name: mallo-kiosk;
+  overflow: hidden;
+  position: relative;
+  flex: none;
+}
+
+.kiosk-content {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  margin-inline: auto;
+  position: relative;
+  min-height: 100%;
+}
+
+.kiosk-header {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 20;
+  min-height: var(--kiosk-header-height);
+  padding: 18px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.kiosk-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--color-primary-dark);
+  font-size: 25px;
+  font-weight: 800;
+}
+
+.kiosk-brand-icon,
+.kiosk-brand-mark {
+  width: 44px;
+  height: 44px;
+  display: block;
+  object-fit: contain;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.kiosk-brand-mark {
+  display: grid;
+  place-items: center;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 24px;
+}
+
+.kiosk-status {
+  color: var(--color-text-secondary);
+  font-size: 21px;
+  font-weight: 700;
+}
+
+.screen {
+  padding-top: calc(var(--kiosk-header-height) + var(--kiosk-screen-padding-block));
+  padding-bottom: calc(104px + var(--kiosk-screen-padding-block));
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-staff-call,
+.btn-send,
+.btn-stop,
+.btn-voice,
+.payment-method-item {
+  min-height: 76px;
+}

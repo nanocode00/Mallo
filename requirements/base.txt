@@ -1,0 +1,7 @@
+# Mallo 공통 기본 의존성
+setuptools==81.0.0
+numpy==1.26.4
+scipy==1.17.1
+soundfile==0.14.0
+safetensors==0.8.0
+jsonschema>=4.20,<5.0

@@ -1,0 +1,6 @@
+# NLU Qwen3-0.6B LoRA 파인튜닝 학습 의존성
+-r ../nlu.txt
+
+peft>=0.14.0
+bitsandbytes>=0.45.0
+trl>=0.10.0

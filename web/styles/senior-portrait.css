@@ -1,0 +1,341 @@
+/* ==========================================================================
+   PORTRAIT KIOSK PROPORTION POLISH — canonical viewport 1080 x 1920
+   ========================================================================== */
+.kiosk-content {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  background: var(--color-background);
+  box-shadow: 0 0 50px rgba(32, 42, 37, 0.08);
+}
+
+.screen-welcome,
+.screen-service-mode,
+.screen-listening,
+.screen-processing,
+.screen-confirm,
+.screen-option-change,
+.screen-payment,
+.screen-complete {
+  width: 100%;
+  padding-inline: var(--kiosk-screen-padding-inline);
+  row-gap: var(--kiosk-section-gap);
+}
+
+.response-bar {
+  width: min(100%, var(--senior-content-width));
+  max-width: none;
+  padding: 26px 34px;
+}
+
+.response-bar-text {
+  font-size: var(--font-body);
+}
+
+/* Welcome uses the full vertical canvas instead of a compact web column. */
+.screen-welcome {
+  justify-content: space-between;
+  text-align: center;
+}
+
+.welcome-hero {
+  flex: 1 1 32%;
+  min-height: 260px;
+  margin-top: 0;
+  align-content: center;
+}
+
+.welcome-hero .character-placeholder {
+  width: 250px;
+  height: 250px;
+  font-size: 120px;
+}
+
+.screen-welcome .welcome-title {
+  margin-top: 0;
+}
+
+.screen-welcome .response-bar {
+  flex: 0 0 auto;
+}
+
+.screen-welcome .welcome-actions {
+  width: min(92%, 860px);
+  max-width: none;
+  gap: 26px;
+  margin-bottom: 28px;
+}
+
+.screen-welcome .btn-primary {
+  min-height: 132px;
+}
+
+.screen-welcome .btn-staff-call {
+  min-height: 104px;
+  font-size: var(--font-body);
+}
+
+/* Context roughly occupies the upper quarter; choices fill the primary area. */
+.screen-service-mode {
+  justify-content: flex-start;
+}
+
+.screen-service-mode .service-mode-title {
+  margin-top: 0;
+}
+
+.service-mode-actions {
+  flex: 1 1 50%;
+  width: min(92%, 960px);
+  max-width: none;
+  margin-top: 46px;
+  align-items: stretch;
+}
+
+.service-mode-button {
+  flex: 1 1 0;
+  min-height: 387px;
+  font-size: 54px;
+}
+
+/* Voice state, waveform and final transcript read as one primary surface. */
+.screen-listening {
+  justify-content: flex-start;
+}
+
+.voice-context {
+  flex: 0 0 auto;
+  padding-top: 0;
+}
+
+.screen-listening > .response-bar {
+  flex: 0 0 auto;
+}
+
+.voice-interaction-area {
+  flex: 1 1 45%;
+  width: min(92%, 960px);
+  min-height: 680px;
+  margin-top: 0;
+  padding: 60px 64px;
+  align-content: center;
+  gap: 40px;
+}
+
+.voice-state-label {
+  font-size: 48px;
+}
+
+.voice-interaction-area .waveform {
+  width: 84%;
+  height: 160px;
+}
+
+.waveform .bar {
+  width: 6px;
+  max-height: 110px;
+}
+
+.voice-live-transcript {
+  width: 100%;
+  min-height: 1.4em;
+}
+
+.voice-interaction-area .voice-button {
+  width: 136px;
+  height: 136px;
+}
+
+.screen-listening .bottom-area {
+  width: min(92%, 900px);
+  padding: 0;
+}
+
+.text-input-area {
+  width: 100%;
+  max-width: none;
+}
+
+.text-input-area input,
+.text-input-area .btn-send {
+  min-height: var(--touch-target-min);
+}
+
+.text-input-area input {
+  font-size: var(--font-supporting);
+}
+
+.screen-processing {
+  min-height: 100%;
+  justify-content: center;
+  padding-bottom: var(--kiosk-screen-padding-block);
+}
+
+.processing-indicator span {
+  width: 30px;
+  height: 30px;
+}
+
+/* Order information comes before supporting system and transcript messages. */
+.screen-confirm .confirm-summary,
+.screen-option-change .current-order,
+.transcript-card--supporting,
+.screen-option-change .option-transcript {
+  width: min(92%, 980px);
+}
+
+.screen-confirm .confirm-summary {
+  margin-top: 0;
+}
+
+.order-summary-card {
+  padding: 40px;
+}
+
+.menu-card {
+  grid-template-columns: 270px minmax(0, 1fr) auto;
+  gap: 40px;
+  padding: 38px 0;
+}
+
+.menu-media,
+.menu-media-image,
+.menu-media-placeholder {
+  width: 270px;
+  height: 270px;
+  border-radius: 32px;
+}
+
+.menu-card .item-price {
+  font-size: 38px;
+}
+
+.order-summary-card .total-row {
+  padding-top: 34px;
+}
+
+.order-summary-card .total-label,
+.order-summary-card .total-price {
+  font-size: 44px;
+}
+
+.screen-confirm .confirm-actions {
+  width: min(92%, 860px);
+  max-width: none;
+  margin-top: 0;
+  gap: 16px;
+}
+
+.screen-confirm .confirm-actions .btn-primary,
+.screen-confirm .confirm-actions .btn-secondary {
+  min-height: 104px;
+  font-size: 34px;
+}
+
+.transcript-card--supporting {
+  order: 5;
+  margin-top: 0;
+  padding: 18px 24px;
+}
+
+/* Keep current order and edit controls visible; examples are supporting copy. */
+.screen-option-change .current-order {
+  margin-top: 0;
+}
+
+.screen-option-change .instruction-card {
+  width: min(92%, 980px);
+  margin-top: 0;
+  padding: 18px 24px;
+}
+
+.screen-option-change .instruction-card .instruction-hint {
+  font-size: var(--font-supporting);
+}
+
+.screen-option-change .instruction-card .example-item {
+  display: inline;
+  font-size: 20px;
+  line-height: 1.7;
+}
+
+.screen-option-change .instruction-card .example-item + .example-item::before {
+  content: "  ·  ";
+}
+
+.screen-option-change .option-actions,
+.screen-option-change > .text-input-area,
+.screen-option-change .option-cancel {
+  width: min(92%, 860px);
+  max-width: none;
+  margin-top: 0;
+}
+
+.screen-option-change .option-actions .btn-voice,
+.screen-option-change .option-cancel {
+  min-height: var(--touch-target-min);
+  font-size: var(--font-supporting);
+}
+
+/* Payment and completion use the primary vertical area. */
+.screen-payment .payment-list {
+  flex: 1 1 52%;
+  width: min(92%, 900px);
+  max-width: none;
+  justify-content: center;
+  gap: 28px;
+}
+
+.payment-method-item {
+  min-height: 142px;
+  font-size: 40px;
+}
+
+.screen-payment .bottom-area {
+  width: min(92%, 860px);
+  max-width: none;
+}
+
+.screen-complete {
+  justify-content: flex-start;
+}
+
+.screen-complete .complete-card {
+  width: min(92%, 900px);
+  margin-top: 0;
+  padding: 68px;
+}
+
+.screen-complete .complete-check {
+  width: 136px;
+  height: 136px;
+  font-size: 68px;
+}
+
+.screen-complete .complete-order-num {
+  font-size: 112px;
+}
+
+.screen-complete .complete-wait-time {
+  font-size: 58px;
+}
+
+.screen-complete .btn-home {
+  width: min(92%, 860px);
+  max-width: none;
+  min-height: 114px;
+  font-size: 40px;
+}
+
+.global-a11y-controls {
+  min-height: 136px;
+  padding: 22px var(--kiosk-screen-padding-inline);
+  gap: 22px;
+}
+
+.btn-a11y--large {
+  flex: 1 1 0;
+  max-width: 310px;
+  min-height: var(--touch-target-min);
+  font-size: 26px;
+}

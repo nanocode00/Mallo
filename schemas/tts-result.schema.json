@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TTSResult",
+  "type": "object",
+  "required": [
+    "text",
+    "level",
+    "sample_rate"
+  ],
+  "properties": {
+    "text": {
+      "type": "string",
+      "description": "합성 대상이 된 원본 또는 Level 변환 텍스트"
+    },
+    "level": {
+      "type": "integer",
+      "enum": [0, 1, 2],
+      "description": "적용된 Adaptive TTS Level (0: 기본, 1: 속도감소/Pause, 2: 분절강조)"
+    },
+    "sample_rate": {
+      "type": "integer",
+      "minimum": 8000,
+      "description": "오디오 샘플링 레이트 (Hz, 기본 24000 또는 16000)"
+    },
+    "duration_ms": {
+      "type": ["number", "null"],
+      "minimum": 0.0,
+      "description": "합성된 오디오의 총 재생 길이 (밀리초)"
+    },
+    "latency_ms": {
+      "type": ["number", "null"],
+      "minimum": 0.0,
+      "description": "음성 합성에 소요된 처리 시간 (밀리초)"
+    },
+    "audio_base64": {
+      "type": ["string", "null"],
+      "description": "Base64로 인코딩된 오디오 바이트 (선택 사항)"
+    }
+  },
+  "additionalProperties": false
+}

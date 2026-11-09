@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>말로(Mallo) — 음성 주문 키오스크</title>
+  <link rel="icon" type="image/x-icon" href="assets/brand/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/brand/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/brand/icon-192x192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/brand/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="senior-ui.css" />
+</head>
+<body>
+  <div class="kiosk-stage" id="kioskStage">
+    <div class="kiosk-shell" id="kioskShell">
+      <div class="kiosk-content">
+      <header class="kiosk-header" aria-label="현재 화면 상태">
+        <div class="kiosk-brand">
+          <img class="kiosk-brand-icon" src="assets/brand/mallo-brand-icon.png" alt="" aria-hidden="true" />
+          <span class="kiosk-brand-title">말로 카페</span>
+        </div>
+        <div class="kiosk-status" id="kioskStatus" hidden></div>
+      </header>
+
+      <!-- ====================================================================
+           Screen 1: WELCOME
+           ==================================================================== -->
+      <div class="screen screen--light screen-welcome active" id="screenWelcome">
+        <div class="welcome-hero animate-in">
+          <img class="welcome-mascot" src="assets/brand/mallo-brand-icon.png" alt="말로 카페 브랜드 아이콘" />
+          <p class="welcome-kicker">천천히 말씀하셔도 괜찮아요</p>
+        </div>
+
+        <h1 class="welcome-title animate-in-delay-1">어서오세요</h1>
+        <p class="welcome-subtitle animate-in-delay-1">말로 편하게 주문해 보세요</p>
+
+        <div class="response-bar animate-in-delay-2" role="status" aria-live="polite">
+          <span class="response-bar-text" id="welcomeResponseText">어서오세요. 말로 카페입니다.</span>
+        </div>
+
+        <div class="welcome-actions animate-in-delay-3">
+          <button class="btn-primary" id="btnStartOrder" aria-label="음성으로 주문하기">
+            주문하기
+          </button>
+
+          <button class="btn-staff-call" id="btnCallStaffWelcome" aria-label="직원 호출">
+            직원 호출
+          </button>
+        </div>
+      </div>
+
+      <!-- ====================================================================
+           Screen 2: SERVICE_MODE
+           ==================================================================== -->
+      <div class="screen screen--light screen-service-mode" id="screenServiceMode">
+        <h2 class="service-mode-title animate-in-delay-1">어떻게 이용하시겠어요?</h2>
+
+        <div class="response-bar animate-in-delay-1" role="status" aria-live="polite">
+          <span class="response-bar-text" id="serviceModeResponseText">매장 이용 또는 포장을 선택해 주세요.</span>
+        </div>
+
+        <div class="service-mode-actions animate-in-delay-2">
+          <button class="service-mode-button" id="btnDineIn">
+            <svg class="service-mode-svg" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M6 38H42" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
+              <path d="M10 18H36V30C36 33.3137 33.3137 36 30 36H16C12.6863 36 10 33.3137 10 30V18Z" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/>
+              <path d="M36 21H38C40.2091 21 42 22.7909 42 25C42 27.2091 40.2091 29 38 29H36" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
+              <path d="M17 8C17 11 15 12 15 14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+              <path d="M23 6C23 10 21 11 21 14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+              <path d="M29 8C29 11 27 12 27 14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+            </svg>
+            <span class="service-mode-label">매장</span>
+            <span class="service-mode-sub">매장 컵 이용</span>
+          </button>
+          <button class="service-mode-button" id="btnTakeout">
+            <svg class="service-mode-svg" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M18 16V12C18 8.68629 20.6863 6 24 6C27.3137 6 30 8.68629 30 12V16" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
+              <path d="M9 16H39L41 40C41 41.1046 40.1046 42 39 42H9C7.89543 42 7 41.1046 7 40L9 16Z" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/>
+              <path d="M15 24H33" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+              <path d="M24 24V34" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+            </svg>
+            <span class="service-mode-label">포장</span>
+            <span class="service-mode-sub">일회용 컵 포장</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ====================================================================
+           Screen 3: ORDER
+           ==================================================================== -->
+      <div class="screen screen--light screen-order screen-listening" id="screenOrder">
+        <section class="voice-context" aria-labelledby="listeningTitle">
+          <h2 class="listening-title animate-in-delay-1" id="listeningTitle">무엇을 더 주문하시겠어요?</h2>
+        </section>
+
+        <div class="response-bar animate-in-delay-1" id="listeningResponse">
+          <span class="response-bar-text" id="listeningResponseText"></span>
+        </div>
+
+        <section class="context-menu-area" id="contextMenuArea" hidden aria-live="polite">
+          <h3>이런 메뉴가 있어요</h3>
+          <div class="context-card-grid" id="contextMenuCards"></div>
+        </section>
+
+        <section class="touch-menu-area" id="touchMenuArea" aria-label="메뉴 목록">
+          <div class="touch-menu-categories" id="touchMenuCategories" aria-label="메뉴 카테고리"></div>
+          <div class="touch-menu-grid" id="touchMenuGrid"></div>
+        </section>
+
+        <div class="bottom-area">
+          <button class="btn-primary btn-view-cart" id="btnViewCart">장바구니 보기 <span class="cart-item-badge" id="cartItemBadge" aria-label="장바구니 상품 수량" hidden></span></button>
+        </div>
+      </div>
+
+      <!-- ====================================================================
+           Screen 4: ORDER_REVIEW
+           ==================================================================== -->
+      <div class="screen screen--light screen-confirm" id="screenOrderReview">
+        <h2 class="confirm-title animate-in-delay-1">주문 내용</h2>
+
+        <div class="response-bar animate-in-delay-1" id="confirmResponse">
+          <span class="response-bar-text" id="confirmResponseText">주문 내용을 확인해 주세요.</span>
+        </div>
+
+        <div class="confirm-summary animate-in-delay-1">
+          <div class="cart-fulfillment-label" id="confirmFulfillmentLabel"></div>
+          <div class="cart-items-scroll" id="confirmItemsScroll" tabindex="0" aria-label="장바구니 메뉴 목록">
+            <div class="cart-items" id="confirmItems"></div>
+          </div>
+          <div class="cart-total-row">
+            <span>총 금액</span>
+            <strong id="confirmTotalPrice">0원</strong>
+          </div>
+        </div>
+
+        <div class="confirm-actions animate-in-delay-2">
+          <button class="btn-primary" id="btnConfirmYes">
+            <span class="payment-cta-label">결제할게요</span>
+            <span class="payment-fulfillment-badge" id="paymentFulfillmentBadge" hidden></span>
+          </button>
+          <button class="btn-secondary" id="btnConfirmRetry">수정할게요</button>
+        </div>
+
+      </div>
+
+      <!-- ====================================================================
+           Voice context: OPTION_CHANGE
+           ==================================================================== -->
+      <div class="screen screen--light screen-option-change" id="screenOptionChange">
+        <h2 class="option-title animate-in-delay-1">어떻게 바꿀까요?</h2>
+
+        <div class="response-bar animate-in-delay-1" id="optionResponse">
+          <span class="response-bar-text" id="optionResponseText">바꾸고 싶은 내용을 편하게 말씀해주세요.</span>
+        </div>
+
+        <div class="current-order order-summary-card animate-in-delay-1" id="currentOrderDisplay">
+          <!-- Populated by JS -->
+        </div>
+
+        <div class="instruction-card animate-in-delay-2">
+          <p class="instruction-hint">바꾸고 싶은 내용을 편하게 말씀해주세요.</p>
+          <div class="example-item">· 아이스 아메리카노 세 잔으로 바꿔 주세요</div>
+          <div class="example-item">· 아메리카노를 따뜻하게 바꿔 주세요</div>
+          <div class="example-item">· 아이스 아메리카노 삭제해 주세요</div>
+        </div>
+
+        <div class="option-actions animate-in-delay-3">
+          <button class="btn-voice btn-order-mic" id="btnOptionSpeak"><img src="assets/icons/microphone.svg" alt="" /><span>말하기</span></button>
+        </div>
+
+        <div class="text-input-area animate-in-delay-3">
+          <input type="text" id="textInputOption" placeholder="변경 내용 입력" aria-label="변경 내용 텍스트 입력" />
+          <button class="btn-send" id="btnSendOption" aria-label="변경 내용 전송">입력</button>
+        </div>
+
+        <button class="btn-secondary option-cancel" id="btnCancelOption">변경하지 않고 돌아가기</button>
+      </div>
+
+      <!-- ====================================================================
+           Screen 7: PAYMENT
+           ==================================================================== -->
+      <div class="screen screen--light screen-payment" id="screenPayment">
+        <h2 class="payment-title animate-in-delay-1">결제</h2>
+        <div class="response-bar animate-in-delay-1" role="status" aria-live="polite">
+          <span class="response-bar-text" id="paymentResponseText">결제 방법을 선택해 주세요</span>
+        </div>
+
+        <div class="payment-total" aria-live="polite"><span>총 결제금액</span><strong id="paymentTotalPrice">0원</strong></div>
+
+        <div class="payment-list payment-grid animate-in-delay-1">
+          <button class="payment-method-item payment-card" data-method="card">
+            <img src="assets/icons/card.svg" alt="" class="payment-card-icon" />
+            <span class="payment-card-name">카드 결제</span>
+            <span class="payment-card-sub">신용 / 체크카드</span>
+          </button>
+          <button class="payment-method-item payment-card" data-method="samsung">
+            <img src="assets/icons/samsung-pay.svg" alt="" class="payment-card-icon" />
+            <span class="payment-card-name">삼성페이</span>
+            <span class="payment-card-sub">스마트폰 터치</span>
+          </button>
+          <button class="payment-method-item payment-card" data-method="kakao">
+            <img src="assets/icons/kakao-pay.svg" alt="" class="payment-card-icon" />
+            <span class="payment-card-name">카카오페이</span>
+            <span class="payment-card-sub">간편 결제</span>
+          </button>
+          <button class="payment-method-item payment-card" data-method="cash">
+            <img src="assets/icons/cash.svg" alt="" class="payment-card-icon" />
+            <span class="payment-card-name">현금 결제</span>
+            <span class="payment-card-sub">지폐 / 동전</span>
+          </button>
+        </div>
+
+        <div class="bottom-area">
+          <button class="btn-secondary" id="btnPaymentBack">← 주문 내용으로 돌아가기</button>
+        </div>
+      </div>
+
+      <section class="voice-overlay" id="voiceOverlay" hidden aria-live="assertive" aria-label="음성 처리 상태">
+        <div class="voice-overlay-panel">
+          <div class="voice-overlay-info">
+            <div class="voice-state-label" id="voiceOverlayTitle">듣고 있어요</div>
+            <div class="waveform" id="waveform" aria-hidden="true">
+              <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+              <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+              <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+              <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+              <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+              <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+              <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+            </div>
+            <p class="voice-live-transcript" id="liveTranscript" hidden></p>
+          </div>
+          <div class="voice-overlay-actions">
+            <button class="btn-primary voice-finish" id="btnMicActive" aria-label="말하기 끝내기">
+              <img src="assets/icons/microphone.svg" alt="" />
+              <span>말하기 끝내기</span>
+            </button>
+            <button class="btn-secondary voice-dismiss" id="btnVoiceDismiss" hidden>화면으로 조작하기</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="confirm-dialog" id="homeConfirmDialog" hidden role="dialog" aria-modal="true" aria-labelledby="homeConfirmTitle">
+        <div class="confirm-dialog-panel">
+          <h2 id="homeConfirmTitle">주문을 취소하고 처음으로 돌아갈까요?</h2>
+          <p>담아둔 메뉴가 모두 사라집니다.</p>
+          <div class="confirm-dialog-actions">
+            <button class="btn-secondary" id="btnCancelHome">계속 주문하기</button>
+            <button class="btn-primary" id="btnConfirmHome">주문 취소하고 처음으로</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="clarification-area" id="clarificationArea" hidden role="dialog" aria-modal="true" aria-live="polite">
+        <h3 id="clarificationQuestion"></h3>
+        <div class="clarification-actions" id="clarificationActions"></div>
+      </section>
+
+      <!-- ====================================================================
+           Screen 8: ORDER_COMPLETE
+           ==================================================================== -->
+      <div class="screen screen--light screen-complete" id="screenComplete">
+        <h2 class="complete-title animate-in-delay-1">주문이 완료되었습니다!</h2>
+
+        <div class="response-bar animate-in-delay-1" role="status" aria-live="polite">
+          <span class="response-bar-text" id="completeResponseText">주문이 완료되었습니다.</span>
+        </div>
+
+        <div class="complete-card animate-in-delay-1">
+          <div class="complete-check" aria-hidden="true">✓</div>
+          <div class="complete-order-number">주문번호</div>
+          <div class="complete-order-num" id="completeOrderNum">A-37</div>
+          <div class="complete-wait-label">예상 대기시간</div>
+          <div class="complete-wait-time" id="completeWaitTime">5분</div>
+          <p class="complete-receipt-hint">영수증이 필요하시면 버튼을 눌러주세요.</p>
+          <button class="btn-receipt" id="btnReceipt">영수증 출력</button>
+        </div>
+
+        <button class="btn-home" id="btnHome" aria-label="처음 화면으로 돌아가기">처음으로 돌아가기</button>
+      </div>
+
+      <footer class="global-a11y-controls" id="globalA11yControls" hidden>
+        <div class="a11y-control-grid">
+          <button class="btn-a11y btn-a11y--large" id="btnGlobalRepeat"><img src="assets/icons/replay.svg" alt="" /><span>다시 듣기</span></button>
+          <button class="btn-a11y btn-a11y--large" id="btnGlobalSpeed"><img src="assets/icons/speed.svg" alt="" /><span>말하기 속도<small id="ttsSpeedStatus" role="status" aria-live="polite">기본</small></span></button>
+          <button class="btn-a11y btn-a11y--large" id="btnGlobalStaff"><img src="assets/icons/staff.svg" alt="" /><span>직원 호출</span></button>
+          <button class="btn-a11y btn-a11y--large" id="btnGlobalHome"><img src="assets/icons/home.svg" alt="" /><span>처음으로</span></button>
+          <button class="btn-global-mic" id="btnGlobalMic" aria-label="음성으로 말하기">
+            <img src="assets/icons/microphone.svg" alt="" />
+            <span>말하기</span>
+          </button>
+        </div>
+      </footer>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="runtime-config.js"></script>
+  <script src="api-url.js"></script>
+  <script src="menu-metadata.js"></script>
+  <script src="service-mode-flow.js"></script>
+  <script src="option-change-flow.js"></script>
+  <script src="tts-player.js"></script>
+  <script src="microphone-input-monitor.js"></script>
+  <script src="ui-command-router.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

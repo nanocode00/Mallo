@@ -1,0 +1,3 @@
+# Mallo 통합 서비스 런타임 진입점
+# 세부 환경별 의존성은 requirements/ 디렉터리를 참조하세요.
+-r requirements/runtime.txt
